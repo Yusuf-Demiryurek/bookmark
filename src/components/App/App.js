@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -8,6 +9,7 @@ import Header from '../Layout/Header/Header';
 import Book from '../Page/Book';
 import NewBook from '../Page/NewBook';
 import UpdateBook from '../Page/UpdateBook';
+import { setBooksList } from '../../actions/books';
 
 const lightTheme = createTheme({
   palette: {
@@ -22,6 +24,19 @@ const darkTheme = createTheme({
 });
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const importState = JSON.parse(localStorage.getItem('state'));
+
+    const localState = importState.list.map((book) => ({
+      ...book,
+      startDate: new Date(book.startDate),
+      endDate: new Date(book.endDate),
+    }));
+
+    dispatch(setBooksList(localState));
+  }, []);
   const [isDark, setIsDark] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   return (

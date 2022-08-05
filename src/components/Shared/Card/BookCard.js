@@ -24,7 +24,8 @@ export default function BookCard({
   const handleDeleteBook = (bookId) => dispatch(deleteBook(bookId));
 
   // Progress calculation
-  const progress = currentPage ? parseInt(currentPage, 10) / parseInt(totalPage, 10) : 0;
+  const progress = (currentPage && totalPage)
+    ? parseInt(currentPage, 10) / parseInt(totalPage, 10) : 0;
   return (
     <Card sx={{
       display: 'flex', flexDirection: 'Column', justifyContent: 'space-between', width: 350, height: 500, m: '1rem',
@@ -40,9 +41,11 @@ export default function BookCard({
         <Typography sx={{ fontSize: 16, mb: 1 }} color="text.secondary">
           {category}
         </Typography>
+        {(currentPage || totalPage) && (
         <Typography sx={{ fontSize: 16, mb: 1 }} color="text.primary">
-          Page {currentPage} / {totalPage}
+          Page {currentPage ? `${currentPage}` : '0'}  {totalPage ? `/ ${totalPage}` : '' }
         </Typography>
+        )}
         <Typography sx={{ fontSize: 10 }} color="text.secondary">
           Commencé le:
         </Typography>

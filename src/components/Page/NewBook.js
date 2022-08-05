@@ -25,11 +25,11 @@ export default function NewBook() {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [category, setCategory] = useState('');
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState(1);
   const [currentPage, setCurrentPage] = useState('');
   const [totalPage, setTotalPage] = useState('');
-  const [startDate, setStartDate] = useState(Date.now());
-  const [endDate, setEndDate] = useState(Date.now());
+  const [startDate, setStartDate] = useState(new Date(Date.now()));
+  const [endDate, setEndDate] = useState(new Date(Date.now()));
   const [score, setScore] = useState(2.5);
   const [review, setReview] = useState('');
 
