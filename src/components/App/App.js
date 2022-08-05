@@ -29,11 +29,11 @@ function App() {
   useEffect(() => {
     const importState = JSON.parse(localStorage.getItem('state'));
 
-    const localState = importState.list.map((book) => ({
+    const localState = importState ? importState.list.map((book) => ({
       ...book,
       startDate: new Date(book.startDate),
       endDate: new Date(book.endDate),
-    }));
+    })) : [];
 
     dispatch(setBooksList(localState));
   }, []);
