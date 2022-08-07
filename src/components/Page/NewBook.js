@@ -46,7 +46,6 @@ const validationSchema = yup.object({
       is: (startDate) => startDate && !(startDate.getTime().isNaN),
       then: (schema) => schema.min((yup.ref('startDate')), 'est inférieure à la date de début'),
     }),
-
 });
 
 export default function NewBook() {
@@ -128,8 +127,8 @@ export default function NewBook() {
             labelId="status"
             id="status"
             name="status"
-            value={formik.values.status}
             label="Status"
+            value={formik.values.status}
             onChange={formik.handleChange}
           >
             <MenuItem value={1}>À lire</MenuItem>

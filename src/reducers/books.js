@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 /* eslint-disable no-case-declarations */
 import {
-  SET_BOOKS_LIST, ADD_BOOK, UPDATE_BOOK, DELETE_BOOK,
+  SET_BOOKS_LIST, ADD_BOOK, UPDATE_BOOK, DELETE_BOOK, SET_FILTERS,
 } from '../actions/books';
 
 // const books = [
@@ -49,6 +49,7 @@ import {
 export const initialState = {
   list: [],
   loading: true,
+  isFiltered: false,
 };
 
 const reducer = (state = initialState, action = {}) => {
@@ -69,6 +70,7 @@ const reducer = (state = initialState, action = {}) => {
       const newState = {
         ...state,
         list: [{ ...action.payload.book }, ...state.list],
+        isFiltered: false,
       };
       const serializedState = JSON.stringify(newState);
       localStorage.setItem('state', serializedState);
@@ -82,6 +84,7 @@ const reducer = (state = initialState, action = {}) => {
       const newState = {
         ...state,
         list: [...newList],
+        isFiltered: false,
       };
       const serializedState = JSON.stringify(newState);
       localStorage.setItem('state', serializedState);
@@ -95,11 +98,17 @@ const reducer = (state = initialState, action = {}) => {
       const newState = {
         ...state,
         list: [...newList],
+        isFiltered: false,
       };
       const serializedState = JSON.stringify(newState);
       localStorage.setItem('state', serializedState);
       return newState;
     }
+    case SET_FILTERS:
+      return {
+        ...state,
+        isFiltered: action.payload.isFiltered,
+      };
     default:
       return state;
   }

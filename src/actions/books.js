@@ -21,3 +21,9 @@ export const deleteBook = (id) => ({
   type: DELETE_BOOK,
   payload: { id: id },
 });
+
+export const SET_FILTERS = 'SET_FILTERS';
+export const setFilter = (isFiltered) => ({
+  type: SET_FILTERS,
+  payload: { isFiltered: isFiltered },
+});

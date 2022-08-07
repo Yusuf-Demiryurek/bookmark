@@ -44,7 +44,7 @@ function App() {
       <CssBaseline />
       <Header isDark={isDark} setIsDark={setIsDark} />
       <Routes>
-        <Route path="/" element={<> </>} />
+        <Route path="/" element={<Book />} />
         <Route path="/book" element={<Book />} />
         <Route path="/book/add" element={<NewBook />} />
         <Route path="/book/update/:id" element={<UpdateBook />} />

@@ -1,6 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { v4 as uuidv4 } from 'uuid';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import Box from '@mui/material/Box';
@@ -46,7 +45,6 @@ const validationSchema = yup.object({
       is: (startDate) => startDate && !(startDate.getTime().isNaN),
       then: (schema) => schema.min((yup.ref('startDate')), 'est inférieure à la date de début'),
     }),
-
 });
 
 export default function NewBook() {
@@ -75,7 +73,7 @@ export default function NewBook() {
     onSubmit: (values) => {
       const book = {
         ...values,
-        id: uuidv4(),
+        id: bookToUpdate.id,
         currentPage: values.currentPage.toString(),
         totalPage: values.totalPage.toString(),
         score: +values.score,
@@ -132,8 +130,8 @@ export default function NewBook() {
             labelId="status"
             id="status"
             name="status"
-            value={formik.values.status}
             label="Status"
+            value={formik.values.status}
             onChange={formik.handleChange}
           >
             <MenuItem value={1}>À lire</MenuItem>
