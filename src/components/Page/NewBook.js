@@ -144,7 +144,7 @@ export default function NewBook() {
         >
           <TextField
             id="currentPage"
-            label="Page actuel"
+            label="Page actuelle"
             variant="outlined"
             sx={{ width: '48%' }}
             type="number"
