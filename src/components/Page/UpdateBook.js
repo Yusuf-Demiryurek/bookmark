@@ -1,6 +1,8 @@
-import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { v4 as uuidv4 } from 'uuid';
+import { useFormik } from 'formik';
+import * as yup from 'yup';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import InputLabel from '@mui/material/InputLabel';
@@ -16,147 +18,202 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 import { updateBook } from '../../actions/books';
 
-export default function UpdateBook() {
-  const { id } = useParams();
+const validationSchema = yup.object({
+  title: yup
+    .string('Veueillez saisir un titre')
+    .min(1, 'Un titre doit contenir au moins 1 caractère')
+    .required('Le titre est requis'),
+  currentPage: yup
+    .number('veuillez entrer un nombre')
+    .positive(0, 'Vueillez entrer une valeur supérieure à 0')
+    .integer('veuillez entrer un entier'),
+  totalPage: yup
+    .number('veuillez entrer un nombre')
+    .positive(0, 'Vueillez entrer une valeur supérieure à 0')
+    .integer('veuillez entrer un entier')
+    .when('currentPage', {
+      is: (currentPage) => currentPage > 0,
+      then: (schema) => schema.min((yup.ref('currentPage')), 'est inférieure à la page actuelle'),
+      otherwise: (schema) => schema.min(0),
+    }),
+  startDate: yup
+    .date()
+    .nullable(),
+  endDate: yup
+    .date()
+    .nullable()
+    .when('startDate', {
+      is: (startDate) => startDate && !(startDate.getTime().isNaN),
+      then: (schema) => schema.min((yup.ref('startDate')), 'est inférieure à la date de début'),
+    }),
 
+});
+
+export default function NewBook() {
+  const dispatch = useDispatch();
+  const { id } = useParams();
   const bookToUpdate = useSelector(
     (state) => state.list.find((book) => book.id === id),
   );
-
   const navigate = useNavigate();
   const navToBookPage = () => navigate('/book', { replace: true });
 
-  const [title, setTitle] = useState(bookToUpdate.title);
-  const [author, setAuthor] = useState(bookToUpdate.author);
-  const [category, setCategory] = useState(bookToUpdate.category);
-  const [status, setStatus] = useState(bookToUpdate.status);
-  const [currentPage, setCurrentPage] = useState(bookToUpdate.currentPage);
-  const [totalPage, setTotalPage] = useState(bookToUpdate.totalPage);
-  const [startDate, setStartDate] = useState(new Date(bookToUpdate.startDate));
-  const [endDate, setEndDate] = useState(new Date(bookToUpdate.endDate));
-  const [score, setScore] = useState(bookToUpdate.score);
-  const [review, setReview] = useState(bookToUpdate.review);
+  const formik = useFormik({
+    initialValues: {
+      title: bookToUpdate.title,
+      author: bookToUpdate.author,
+      category: bookToUpdate.category,
+      status: bookToUpdate.status,
+      currentPage: bookToUpdate.currentPage,
+      totalPage: bookToUpdate.totalPage,
+      startDate: bookToUpdate.startDate,
+      endDate: bookToUpdate.endDate,
+      score: bookToUpdate.score,
+      review: bookToUpdate.review,
+    },
+    validationSchema: validationSchema,
+    onSubmit: (values) => {
+      const book = {
+        ...values,
+        id: uuidv4(),
+        currentPage: values.currentPage.toString(),
+        totalPage: values.totalPage.toString(),
+        score: +values.score,
+      };
+      dispatch(updateBook(book));
+      navToBookPage();
+    },
+  });
 
-  const titleHandler = (e) => {
-    setTitle(e.target.value);
-  };
-  const authorHandler = (e) => {
-    setAuthor(e.target.value);
-  };
-  const categoryHandler = (e) => {
-    setCategory(e.target.value);
-  };
-  const statusHandler = (e) => {
-    setStatus(e.target.value);
-  };
-  const currentPageHandler = (e) => {
-    setCurrentPage(e.target.value);
-  };
-  const totalPageHandler = (e) => {
-    setTotalPage(e.target.value);
-  };
-  const startDateHandler = (e) => {
-    setStartDate(e);
-  };
-  const endDateHandler = (e) => {
-    setEndDate(e);
-  };
-  const scoreHandler = (e) => {
-    setScore(+e.target.value);
-  };
-  const reviewHandler = (e) => {
-    setReview(e.target.value);
-  };
-
-  const dispatch = useDispatch();
-  const submitHandler = () => {
-    const book = {
-      id: id,
-      title: title,
-      author: author,
-      category: category,
-      status: status,
-      currentPage: currentPage,
-      totalPage: totalPage,
-      startDate: startDate,
-      endDate: endDate,
-      review: review,
-      score: score,
-    };
-    dispatch(updateBook(book));
-    navToBookPage();
-  };
+  // console.log(formik.errors);
 
   return (
-    <Box
-      component="form"
-      marginTop="2rem"
-      marginBottom="2rem"
-      sx={{
-        display: 'flex',
-        flexDirection: 'Column',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        '& > :not(style)': { m: 1, width: '90%' },
-      }}
-      noValidate
-      autoComplete="on"
-    >
-      <TextField id="title" label="Titre" variant="outlined" value={title} onChange={titleHandler} />
-      <TextField id="author" label="Auteur" variant="outlined" value={author} onChange={authorHandler} />
-      <TextField id="category" label="Catégorie" variant="outlined" value={category} onChange={categoryHandler} />
-      <FormControl fullWidth>
-        <InputLabel id="status">Status</InputLabel>
-        <Select
-          labelId="status"
-          id="status"
-          value={status}
-          label="Age"
-          onChange={statusHandler}
-        >
-          <MenuItem value={1}>À lire</MenuItem>
-          <MenuItem value={2}>En cours</MenuItem>
-          <MenuItem value={3}>Fini</MenuItem>
-        </Select>
-      </FormControl>
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}
+    <FormControl fullWidth onSubmit={formik.handleSubmit}>
+      <Box
+        component="form"
+        marginTop="2rem"
+        marginBottom="2rem"
+        sx={{
+          display: 'flex',
+          flexDirection: 'Column',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          '& > :not(style)': { m: 1, width: '90%' },
+        }}
+        noValidate
+        autoComplete="on"
       >
-        <TextField id="currentPage" label="Page actuel" variant="outlined" sx={{ width: '48%' }} value={currentPage} onChange={currentPageHandler} />
-        <TextField id="totalPage" label="Nombre de Page" variant="outlined" sx={{ width: '48%' }} value={totalPage} onChange={totalPageHandler} />
-      </Box>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <MobileDatePicker
-          label="Date de début"
-          inputFormat="dd/MM/yyyy"
-          value={startDate}
-          onChange={startDateHandler}
-          renderInput={(params) => <TextField {...params} />}
+        <TextField
+          id="title"
+          label="Titre"
+          variant="outlined"
+          value={formik.values.title}
+          onChange={formik.handleChange}
+          error={formik.touched.title && Boolean(formik.errors.title)}
+          helperText={formik.touched.title && formik.errors.title}
         />
-        <MobileDatePicker
-          label="Date de fin"
-          inputFormat="dd/MM/yyyy"
-          value={endDate}
-          onChange={endDateHandler}
-          renderInput={(params) => <TextField {...params} />}
+        <TextField
+          id="author"
+          label="Auteur"
+          variant="outlined"
+          value={formik.values.author}
+          onChange={formik.handleChange}
         />
-      </LocalizationProvider>
-      <Box>
-        <Typography component="legend">Note</Typography>
-        <Rating name="score" precision={0.5} value={score} onChange={scoreHandler} />
+        <TextField
+          id="category"
+          label="Catégorie"
+          variant="outlined"
+          value={formik.values.category}
+          onChange={formik.handleChange}
+        />
+        <FormControl fullWidth>
+          <InputLabel id="status">Status</InputLabel>
+          <Select
+            labelId="status"
+            id="status"
+            name="status"
+            value={formik.values.status}
+            label="Status"
+            onChange={formik.handleChange}
+          >
+            <MenuItem value={1}>À lire</MenuItem>
+            <MenuItem value={2}>En cours</MenuItem>
+            <MenuItem value={3}>Fini</MenuItem>
+          </Select>
+        </FormControl>
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+        >
+          <TextField
+            id="currentPage"
+            label="Page actuel"
+            variant="outlined"
+            sx={{ width: '48%' }}
+            type="number"
+            value={formik.values.currentPage}
+            onChange={formik.handleChange}
+          />
+          <TextField
+            id="totalPage"
+            label="Nombre de Pages"
+            variant="outlined"
+            sx={{ width: '48%' }}
+            type="number"
+            value={formik.values.totalPage}
+            onChange={formik.handleChange}
+            error={formik.touched.totalPage && Boolean(formik.errors.totalPage)}
+            helperText={formik.touched.totalPage && formik.errors.totalPage}
+          />
+        </Box>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <MobileDatePicker
+            id="startDate"
+            name="startDate"
+            label="Date de début"
+            inputFormat="dd/MM/yyyy"
+            value={formik.values.startDate}
+            onChange={(value) => formik.setFieldValue('startDate', value)}
+            renderInput={(params) => <TextField {...params} />}
+          />
+          <MobileDatePicker
+            id="endDate"
+            name="endDate"
+            label="Date de fin"
+            inputFormat="dd/MM/yyyy"
+            value={formik.values.endDate}
+            onChange={(value) => formik.setFieldValue('endDate', value)}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                error={formik.touched.endDate && Boolean(formik.errors.endDate)}
+                helperText={formik.touched.endDate && formik.errors.endDate}
+              />
+            )}
+          />
+        </LocalizationProvider>
+        <Box>
+          <Typography component="legend">Note</Typography>
+          <Rating
+            id="score"
+            name="score"
+            precision={0.5}
+            value={+formik.values.score}
+            onChange={formik.handleChange}
+          />
+        </Box>
+        <TextField
+          id="review"
+          label="Commentaire"
+          multiline
+          rows={3}
+          value={formik.values.review}
+          onChange={formik.handleChange}
+        />
+        <Button variant="contained" type="submit">Mettre à jour</Button>
       </Box>
-      <TextField
-        id="outlined-multiline-static"
-        label="Commentaire"
-        multiline
-        rows={3}
-        value={review}
-        onChange={reviewHandler}
-      />
-      <Button variant="contained" onClick={submitHandler}>Mettre à jour</Button>
-    </Box>
+    </FormControl>
   );
 }

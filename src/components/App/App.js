@@ -31,8 +31,8 @@ function App() {
 
     const localState = importState ? importState.list.map((book) => ({
       ...book,
-      startDate: new Date(book.startDate),
-      endDate: new Date(book.endDate),
+      startDate: book.startDate ? new Date(book.startDate) : null,
+      endDate: book.endDate ? new Date(book.endDate) : null,
     })) : [];
 
     dispatch(setBooksList(localState));

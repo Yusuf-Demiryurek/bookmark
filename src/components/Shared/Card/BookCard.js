@@ -46,18 +46,26 @@ export default function BookCard({
           Page {currentPage ? `${currentPage}` : '0'}  {totalPage ? `/ ${totalPage}` : '' }
         </Typography>
         )}
-        <Typography sx={{ fontSize: 10 }} color="text.secondary">
-          Commencé le:
-        </Typography>
-        <Typography sx={{ fontSize: 12 }} color="text.primary">
-          {`${startDate.getDate()}/${startDate.getMonth() + 1}/${startDate.getFullYear()}`}
-        </Typography>
-        <Typography sx={{ fontSize: 10 }} color="text.secondary">
-          fini le:
-        </Typography>
-        <Typography sx={{ fontSize: 12, mb: 1 }} color="text.primary">
-          {`${endDate.getDate()}/${endDate.getMonth() + 1}/${endDate.getFullYear()}`}
-        </Typography>
+        {startDate && (
+        <>
+          <Typography sx={{ fontSize: 10 }} color="text.secondary">
+            Commencé le:
+          </Typography>
+          <Typography sx={{ fontSize: 12, mb: 1 }} color="text.primary">
+            {`${startDate.getDate()}/${startDate.getMonth() + 1}/${startDate.getFullYear()}`}
+          </Typography>
+        </>
+        )}
+        {endDate && (
+          <>
+            <Typography sx={{ fontSize: 10 }} color="text.secondary">
+              fini le:
+            </Typography>
+            <Typography sx={{ fontSize: 12, mb: 1 }} color="text.primary">
+              {`${endDate.getDate()}/${endDate.getMonth() + 1}/${endDate.getFullYear()}`}
+            </Typography>
+          </>
+        )}
         {status === 3 && <FinishBadge />}
         {status === 2 && <InProgressBadge />}
         {status === 1 && <ToStartBadge />}
@@ -65,7 +73,7 @@ export default function BookCard({
         <Typography variant="body1">
           {review}
         </Typography>
-        <Rating name="half-rating" defaultValue={score} precision={0.5} readOnly />
+        <Rating name="half-rating" value={+score} precision={0.5} readOnly />
       </CardContent>
       <CardActions>
         <Button variant="outlined" onClick={() => handleNavToUpdateForm(id)}>Editer</Button>
@@ -83,8 +91,14 @@ BookCard.propTypes = {
   status: PropTypes.number.isRequired,
   currentPage: PropTypes.string.isRequired,
   totalPage: PropTypes.string.isRequired,
-  startDate: PropTypes.instanceOf(Date).isRequired,
-  endDate: PropTypes.instanceOf(Date).isRequired,
+  startDate: PropTypes.instanceOf(Date),
+  endDate: PropTypes.instanceOf(Date),
   review: PropTypes.string.isRequired,
-  score: PropTypes.number.isRequired,
+  score: PropTypes.number,
+};
+
+BookCard.defaultProps = {
+  startDate: null,
+  endDate: null,
+  score: 0,
 };
